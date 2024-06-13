@@ -73,4 +73,61 @@ server.get('/moon/:id', async(req, res)=>{
         res.status(400).json(error);
         
     }
+    await conn.end();
 });
+
+// endpoint POST añadimos moon
+server.post('/moon', async (req, res) => {
+    const conn = await getConnection();
+    const { sign, descripcion, afectacion } = req.body;
+
+    const sqlInsert = 'insert into moon (sign, descripcion, afectacion ) values (?,?,?)';
+    const [newMoon] = await conn.query(sqlInsert, [
+        sign,
+        descripcion,
+        afectacion,
+    ]);
+    res.status(200).json({success: true, id: newMoon.insertId,});
+await conn.end();
+});
+
+//endpoint PUT para modificar un moon existente
+
+server.put('/moon/:id', async (req, res) => {
+    const conn = await getConnection ();
+    const idMoon = req.params.id;
+    const newData = req.body;
+
+    const modificarSql = 'UPDATE moon SET sign = ?, descripcion = ?, afectacion = ? WHERE id = ?';
+    const [result] = await conn.query(modificarSql, [
+        newData.sign,
+        newData.descripcion,
+        newData.afectacion,
+        idMoon,
+]);
+if ( result.affectedRows > 0 ) {
+    res.status(200).json ({success: true});
+
+}else{
+    res.status(200).json ({success: false, message: 'No existe ese id'});
+}
+await conn.end();
+console.log(result);
+});
+
+// delete de una moon por id
+
+server.delete('/moon/:id', async (req, res) => {
+    const conn = await getConnection();
+    const idMoon = req.params.id;
+    const newData = req.body;
+    const modificarSql =' delete from moon WHERE id = ?';
+    const [result] =await conn.query(deleteSql, [idMoon]);
+    if (result. affectedRows > 0) {
+        res.status(200),json({success: true});
+    }
+    else{
+        res.status(200),json({success: false, message:'No existe el id'});
+    }
+    console.log(result);
+})
